@@ -326,6 +326,9 @@ static bool scan_comment(
             lexer->result_symbol = COMMENT;
             advance(lexer);
         } else {
+            if (lexer->lookahead == '\n' || lexer->lookahead == '\r') {
+                advance(lexer);
+            }
             lexer->result_symbol = LINE_CONTINUATION;
             consume_whitespaces_once(lexer);
             lexer->mark_end(lexer);
@@ -451,6 +454,7 @@ skip_command_check:
     // pwd
     // pwd;
     // pwd,
+
     if (is_eol(lexer->lookahead)) {
         lexer->result_symbol = valid_symbols[CATCH_IDENTIFIER] ? CATCH_IDENTIFIER : COMMAND_NAME;
         return true;

@@ -122,7 +122,7 @@ module.exports = grammar({
     _expression: ($) =>
       choice(
         $.binary_operator,
-        $.boolean_operator,
+        $._boolean_operator,
         $.cell,
         $.comparison_operator,
         $.function_call,
@@ -137,7 +137,7 @@ module.exports = grammar({
         $.postfix_operator,
         $.range,
         $.string,
-        $.unary_operator,
+        $._unary_operator,
         $.field_expression,
       ),
 
@@ -148,7 +148,7 @@ module.exports = grammar({
         1,
         choice(
           $.binary_operator,
-          $.boolean_operator,
+          $._boolean_operator,
           $.cell,
           $.comparison_operator,
           $.function_call,
@@ -160,7 +160,7 @@ module.exports = grammar({
           $.postfix_operator,
           $.string,
           $.field_expression,
-          $.unary_operator,
+          $._unary_operator,
         ),
       ),
 
@@ -198,8 +198,12 @@ module.exports = grammar({
       );
     },
 
-    unary_operator: ($) =>
-      prec(
+    _unary_operator: ($) =>
+      choice(
+        $.positive_operator,
+        $.negative_operator,
+      ),
+      /*prec(
         PREC.unary,
         seq(
           choice('+', '-'),
@@ -216,7 +220,55 @@ module.exports = grammar({
               $.parenthesis,
               $.postfix_operator,
               $.string,
-              $.unary_operator,
+              //$.unary_operator,
+            ),
+          ),
+        ),
+      ),*/
+
+    positive_operator: ($) =>
+      prec(
+        PREC.unary,
+        seq(
+          '+',
+          field(
+            'operand',
+            choice(
+              $.cell,
+              $.field_expression,
+              $.function_call,
+              $.identifier,
+              $.matrix,
+              $.not_operator,
+              $.number,
+              $.parenthesis,
+              $.postfix_operator,
+              $.string,
+              $._unary_operator,
+            ),
+          ),
+        ),
+      ),
+
+    negative_operator: ($) =>
+      prec(
+        PREC.unary,
+        seq(
+          '-',
+          field(
+            'operand',
+            choice(
+              $.cell,
+              $.field_expression,
+              $.function_call,
+              $.identifier,
+              $.matrix,
+              $.not_operator,
+              $.number,
+              $.parenthesis,
+              $.postfix_operator,
+              $.string,
+              $._unary_operator,
             ),
           ),
         ),
@@ -237,7 +289,7 @@ module.exports = grammar({
             $.parenthesis,
             $.postfix_operator,
             $.string,
-            $.unary_operator,
+            $._unary_operator,
             $.not_operator,
           ),
           ')',
@@ -278,7 +330,7 @@ module.exports = grammar({
       $.postfix_operator,
       $.range,
       $.string,
-      $.unary_operator,
+      $._unary_operator,
       $.field_expression,
     ))),
 
@@ -297,16 +349,22 @@ module.exports = grammar({
         ),
       ),
 
-    boolean_operator: ($) =>
+    _boolean_operator: ($) =>
       choice(
-        prec.left(
+        $.and_operator,
+        $.or_operator,
+      ),
+
+    and_operator: ($) =>
+      prec.left(
           PREC.and,
           seq(field('left', $._expression), '&&', field('right', $._expression)),
-        ),
-        prec.left(
+      ),
+    
+    or_operator: ($) =>
+      prec.left(
           PREC.or,
           seq(field('left', $._expression), '||', field('right', $._expression)),
-        ),
       ),
 
     postfix_operator: ($) =>
@@ -326,7 +384,7 @@ module.exports = grammar({
               $.postfix_operator,
               $.string,
               $.field_expression,
-              $.unary_operator,
+              $._unary_operator,
             ),
           ),
           choice(alias($._transpose, "'"), alias($._ctranspose, ".'")),
@@ -418,15 +476,22 @@ module.exports = grammar({
 
     _index_boolean_operator: ($) =>
       choice(
-        prec.left(
-          PREC.and + 1,
-          seq(field('left', alias($._index_expression, $._expression)), '&&', field('right', alias($._index_expression, $._expression))),
-        ),
-        prec.left(
-          PREC.or + 1,
-          seq(field('left', alias($._index_expression, $._expression)), '||', field('right', alias($._index_expression, $._expression))),
-        ),
+        $._index_and_operator,
+        $._index_or_operator,
       ),
+    
+    _index_and_operator: ($) => 
+      prec.left(
+        PREC.and + 1,
+        seq(field('left', alias($._index_expression, $._expression)), '&&', field('right', alias($._index_expression, $._expression))),
+      ), 
+
+    _index_or_operator: ($) => 
+      prec.left(
+        PREC.or + 1,
+        seq(field('left', alias($._index_expression, $._expression)), '||', field('right', alias($._index_expression, $._expression))),
+      ),
+
     _index_comparison_operator: ($) =>
       prec.left(
         PREC.compare + 1,
@@ -438,7 +503,11 @@ module.exports = grammar({
       ),
     _index_not_operator: ($) => prec(PREC.not + 1, seq('~', alias($._index_expression, $._expression))),
     _index_unary_operator: ($) =>
-      prec(
+      choice(
+        $.positive_operator,
+        $.negative_operator,
+      ),
+    /*  prec(
         PREC.unary + 1,
         seq(
           choice('+', '-'),
@@ -459,7 +528,53 @@ module.exports = grammar({
             ),
           ),
         ),
+      ),*/
+    _index_positive_operator: ($) =>
+      prec(
+        PREC.unary + 1,
+        seq(
+          '+',
+          field(
+            'operand',
+            choice(
+              $.cell,
+              $.field_expression,
+              $.function_call,
+              $.identifier,
+              alias($._index_matrix, $.matrix),
+              alias($._index_not_operator, $.not_operator),
+              $.number,
+              alias($._index_parenthesis, $.parenthesis),
+              alias($._index_postfix_operator, $.postfix_operator),
+              $.string,
+              alias($._index_unary_operator, $._unary_operator),
+            ),
+          ),
+        ),
       ),
+    _index_negative_operator: ($) =>
+      prec(
+        PREC.unary + 1,
+        seq(
+          '-',
+          field(
+            'operand',
+            choice(
+              $.cell,
+              $.field_expression,
+              $.function_call,
+              $.identifier,
+              alias($._index_matrix, $.matrix),
+              alias($._index_not_operator, $.not_operator),
+              $.number,
+              alias($._index_parenthesis, $.parenthesis),
+              alias($._index_postfix_operator, $.postfix_operator),
+              $.string,
+              alias($._index_unary_operator, $._unary_operator),
+            ),
+          ),
+        ),
+      ),     
     _index_postfix_operator: ($) =>
       prec(
         PREC.postfix + 1,
@@ -477,7 +592,7 @@ module.exports = grammar({
               alias($._index_postfix_operator, $.postfix_operator),
               $.string,
               $.field_expression,
-              alias($._index_unary_operator, $.unary_operator),
+              alias($._index_unary_operator, $._unary_operator),
             ),
           ),
           choice(alias($._transpose, "'"), alias($._ctranspose, ".'")),
@@ -510,7 +625,7 @@ module.exports = grammar({
         alias($._index_parenthesis, $.parenthesis),
         alias($._index_postfix_operator, $.postfix_operator),
         $.string,
-        prec.dynamic(-1, alias($._index_unary_operator, $.unary_operator)),
+        prec.dynamic(-1, alias($._index_unary_operator, $._unary_operator)),
         prec.dynamic(1, alias($._index_binary_operator, $.binary_operator)),
         $.end_keyword,
       )),
@@ -530,7 +645,7 @@ module.exports = grammar({
     // a non-index matrix/row too early.
     _index_expression: ($) =>
       choice(
-        alias($._index_boolean_operator, $.boolean_operator),
+        alias($._index_boolean_operator, $._boolean_operator),
         $.field_expression,
         $.function_call,
         $.handle_operator,
@@ -547,7 +662,7 @@ module.exports = grammar({
         alias($._index_binary_operator, $.binary_operator),
         alias($._index_postfix_operator, $.postfix_operator),
         $.string,
-        alias($._index_unary_operator, $.unary_operator),
+        alias($._index_unary_operator, $._unary_operator),
         $.end_keyword,
       ),
     _index_binary_expression: ($) =>
@@ -555,7 +670,7 @@ module.exports = grammar({
         2,
         choice(
           alias($._index_binary_operator, $.binary_operator),
-          alias($._index_boolean_operator, $.boolean_operator),
+          alias($._index_boolean_operator, $._boolean_operator),
           $.cell,
           alias($._index_comparison_operator, $.comparison_operator),
           $.function_call,
@@ -567,7 +682,7 @@ module.exports = grammar({
           alias($._index_postfix_operator, $.postfix_operator),
           $.string,
           $.field_expression,
-          alias($._index_unary_operator, $.unary_operator),
+          alias($._index_unary_operator, $._unary_operator),
           $.end_keyword,
         ),
       ),
@@ -692,7 +807,7 @@ module.exports = grammar({
         $.parenthesis,
         $.postfix_operator,
         $.string,
-        prec.dynamic(-1, $.unary_operator),
+        prec.dynamic(-1, $._unary_operator),
         prec.dynamic(1, $.binary_operator),
       ),
     range: ($) =>
