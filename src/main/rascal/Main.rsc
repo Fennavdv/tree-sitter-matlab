@@ -5,7 +5,7 @@ import DateTime;
 
 int main(int testArgument=0) {
     datetime before = now();
-    print(runParser());
+    runParser();
     datetime after = now();
     print(createDuration(before, after));
     return 0;
