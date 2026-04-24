@@ -934,7 +934,7 @@ module.exports = grammar({
     function_output: ($) =>
       seq(choice($.identifier, $.multioutput_variable), '='),
     function_arguments: ($) =>
-      seq('(', field('arguments', optional($._lambda_arguments)), ')'),
+      seq('(', optional($._lambda_arguments), ')'),
     function_definition: ($) =>
       prec.dynamic(0, seq(
         'function',
