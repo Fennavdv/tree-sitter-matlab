@@ -2,7 +2,6 @@
 package org.treesitter;
 
 import org.treesitter.utils.NativeUtils;
-import org.treesitter.TSLanguage;
 
 public class TreeSitterMatlab extends TSLanguage {
 

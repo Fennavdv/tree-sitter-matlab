@@ -50,7 +50,7 @@ public class Parser {
         TSLanguage json = new TreeSitterMatlab();
         parser.setLanguage(json);
 
-        ArrayList<Path> filesInDirList = getMatlabFiles("src/main/resources/exampleFiles");
+        ArrayList<Path> filesInDirList = getMatlabFiles("src/main/resources/singleexample");
         Path[] filesInDir = filesInDirList.toArray(new Path[filesInDirList.size()]);
         TSTree[] asts = new TSTree[filesInDir.length];
         String[] strs = new String[filesInDir.length];
@@ -153,10 +153,13 @@ public class Parser {
                 children.add(convertedChild);
             }
         }
-        //if(type.equals("identifier") || type.equals("comment")) {
+        if(
+            type.equals("identifier") || type.equals("comment") || type.equals("number") ||
+            type.equals("string_content") || type.equals("escape_sequence") || type.equals("formatting_sequence")
+        ) {
             byte[] bytes = code.getBytes(StandardCharsets.UTF_8);
             children.add(values.string(new String(Arrays.copyOfRange(bytes, node.getStartByte(), node.getEndByte()), StandardCharsets.UTF_8)));
-        //}
+        }
         //System.out.println(fields);
         INode nodeWithoutFields = values.node(type, children.toArray(new IValue[children.size()]));
         return new NodeWithKeywordParametersFacade(nodeWithoutFields, fields);
