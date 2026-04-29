@@ -1,6 +1,0 @@
-.DS_Store
-bin
-target
-.vscode
-/src/main/resources/exampleFiles
-*.log
