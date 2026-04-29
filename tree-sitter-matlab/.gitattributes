@@ -1,0 +1,7 @@
+* linguist-vendored
+grammar.js linguist-vendored=false
+src/scanner.c linguist-vendored=false
+
+src/grammar.json -diff
+src/node-types.json -diff
+src/parser.c -diff

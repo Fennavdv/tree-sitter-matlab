@@ -1,0 +1,7 @@
+/build
+/node_modules
+/examples/*/
+/target
+fuzzer
+/plotly_aux
+paths.txt
