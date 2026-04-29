@@ -1,0 +1,13 @@
+.DS_Store
+bin
+target
+.vscode
+/src/main/resources/exampleFiles
+*.log
+/tree-sitter-matlab/build
+/tree-sitter-matlab/node_modules
+/tree-sitter-matlab/examples/*/
+/tree-sitter-matlab/target
+/tree-sitter-matlab/fuzzer
+/tree-sitter-matlab/plotly_aux
+/tree-sitter-matlab/paths.txt
